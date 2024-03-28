@@ -1,0 +1,104 @@
+# Las API tienen que ser ABIERTAS para recibir (parametros) y 
+# CERRADAS para procesar (excluye los datos que no pertenecen al dominio) 
+# con como embudos o filtros lo que le otorga ROBUSTEZ 
+##############################################################################################
+#                                    API REQUEST
+##############################################################################################
+### Recuperar todas las peliculas
+GET http://localhost:1234/movies
+
+### Recuperar una película por id
+GET http://localhost:1234/movies/c8a7d63f-3b04-44d3-9d95-8782fd7dcfaf
+
+### Recuperar todas las peliculas del genero action (filtro)
+GET http://localhost:1234/movies?genre=drama
+
+##############################################################################################
+#                        TEORIA: DIFERENCIA ENTRE POST / PUT / PATCH
+##############################################################################################
+# IDEMPOTENCIA (propiedad): misma accion, mismo resultado (consistencia) i.e. funciones puras 
+
+## POST: crear NUEVO elemento/recurso en el server (path -> /movies)
+### NO es IDEMPOTENTE porque siempre creas un nuevo recurso (NUEVAS IDS generadas) 
+
+## PUT: actualizar TOTALMENTE un recurso existente o crearlo si no existe (path -> /movies/:id)
+### ES IDEMPOTENTE porque a mismos parametros misma modificacion o creacion del recurso (misma id)
+
+## PATCH: actualizar PARCIALMENTE un recurso (path -> /movies/:id)
+## En ppio ES IDEMPOTENTE porque a mismas modificaciones mismos resultados pero puede existir
+# un campo 'updatedAt' que se modifica entre request (esto puede pasar con PUT pero no es tan normal
+# porque se busca modificar todo el recurso)
+
+##############################################################################################
+### Crear una pelicula
+POST http://localhost:1234/movies
+Content-Type: application/json
+
+{
+  "title": "The Godfather",
+  "year": 1975,
+  "director": "Franis Ford Coppola",
+  "duration": 175,
+  "poster": "https://img.fruugo.com/producto/4/49/14441494_max.jpg",
+  "genre": [
+    "Crime",
+    "Drama"
+  ],
+  "sql": "SELECT * FROM users"
+}
+
+# Gracias al schema se ignoran todos los attrs que no matchean (ie. sql) 
+# evitando validaciones innecesarias otorgandole ROBUSTEZ
+
+# BAD REQUEST
+# {
+#   "title": 2,
+#   "year": "1990"
+# }
+
+##############################################################################################
+### Actualizar una pelicula (una parte)
+PATCH http://localhost:1234/movies/dcdd0fad-a94c-4810-8acc-5f108d3b18c3
+Content-Type: application/json
+
+{
+  "id": 123,
+  "year": 1998
+}
+
+# La id como no se valida la ignora
+
+##############################################################################################
+### Borrar una pelicula
+DELETE http://localhost:1234/movies/6c7ee280-9906-43ea-b6cc-cdd3f627fa56
+
+##############################################################################################
+#                       TEORIA: CORS (Cross Origin Resource Sharing)
+##############################################################################################
+## DEFINICION: Mecanismo que restringe un RECURSO en un cliente/navegador (pagina web) para
+#     evitar que un dominio fuera de otro dominio pueda acceder (diferentes IPs client-server)
+#
+# HEADERS:
+# Cliente -> Referrer Policy: strict-origin-when-cross-origin
+# Server -> Access-Control-Allow-Origin: '*'
+#
+# Este tipo de error se arregla SIEMPRE desde el backend agregando el header faltante
+# Puede ser en la API, en el PROXY, en el ENROUTADOR
+#
+# En el caso de una API se puede configurar de manera gral o en cada endpoint o path
+# Dominio = protcol + ip + port
+# res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:5500');
+#
+# Tambien existe una restriccion segun el metodo utilizado
+#
+# Metodos simples: GET/POST/HEAD
+# Metodos complejos: PUT/PATCH/DELETE
+#
+# Los METODOS COMPLEJOS tiene una policy llamada CORS PRE-Flight
+# Esto significa que requieren de una peticion previa especial OPTIONS
+#
+# Se traduce en un nuevo endpoint de verbo OPTIONS y agregar los sig headers:
+# 'Access-Control-Allow-Origin': origin
+# 'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE'
+
+

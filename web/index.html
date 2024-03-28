@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Probar API REST</title>
+  <style>
+    body {background-color: rgb(220, 149, 137);}
+    article {border: 1px solid black; padding: 1rem; margin: 1rem; background-color: lightgreen;}
+    img {width: 320px;height: auto;max-width:100%;}
+  </style>
+  <script type="module">
+    fetch('http://localhost:1234/movies')
+      .then((response) => response.json())
+      .then((movies) => {
+        const html = movies.map((movie) => {
+          return `
+            <article data-id="${movie.id}">
+              <h1>${movie.title}</h1>
+              <img src=${movie.poster} alt=${movie.title} />
+              <div>${movie.director} - ${movie.year}</div>
+              <button>Eliminar</button>
+            </article>
+          `
+        }).join('');
+        document.querySelector('main').innerHTML = html;
+        
+        document.addEventListener('click', (e) => {
+          if (e.target.matches('button')) {
+            const article = e.target.closest('article');
+            fetch(`http://localhost:1234/movies/${article.dataset.id}`, { method: 'DELETE' })
+            .then((res) => {
+              if (res.ok) {
+                article.remove()
+              }
+            })
+          }
+        })
+      }).catch(error => {
+        document.querySelector('main').innerHTML = `<h1>Error ${error}</h1>`
+      })
+  </script>
+</head>
+<body>
+  <main></main>
+</body>
+</html>
