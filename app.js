@@ -16,9 +16,10 @@ const ACCEPTED_ORIGINS = [
 
 var corsOptions = {
   origin(origin, callback) {
-    return ACCEPTED_ORIGINS.includes(origin)
-      ? callback(null, true)
-      : callback(new Error('Not allowed by CORS'))
+    if (ACCEPTED_ORIGINS.includes(origin) || !origin){
+      return callback(null, true)
+    }
+    callback(new Error('Not allowed by CORS'))
   }
 }
 
