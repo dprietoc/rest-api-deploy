@@ -1,10 +1,11 @@
 {
-  "name": "api",
+  "name": "rest-api-deploy",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node --watch ./server",
+    "start": "node server.js",
+    "init": "node --watch ./server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
